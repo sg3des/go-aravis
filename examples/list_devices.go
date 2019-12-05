@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	aravis "github.com/thinkski/go-aravis"
+	aravis "github.com/hybridgroup/go-aravis"
 )
 
 func main() {
