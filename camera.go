@@ -225,6 +225,10 @@ func (c *Camera) SoftwareTrigger() {
 	C.arv_camera_software_trigger(c.camera)
 }
 
+func (c *Camera) ClearTriggers() {
+	C.arv_camera_clear_triggers(c.camera)
+}
+
 func (c *Camera) IsExposureTimeAvailable() (bool, error) {
 	gboolean, err := C.arv_camera_is_exposure_time_available(c.camera)
 	return toBool(gboolean), err
