@@ -25,16 +25,16 @@ func (d *Device) GetStringFeatureValue(feature string) (string, error) {
 	return C.GoString(cvalue), err
 }
 
-func (d *Device) SetIntegerFeatureValue(feature string, value int) {
+func (d *Device) SetIntegerFeatureValue(feature string, value int64) {
 	cfeature := C.CString(feature)
-	cvalue := C.int(value)
+	cvalue := C.long(value)
 	C.arv_device_set_integer_feature_value(d.device, cfeature, cvalue)
 	C.free(unsafe.Pointer(cfeature))
 }
 
-func (d *Device) GetIntegerFeatureValue(feature string) (int, error) {
+func (d *Device) GetIntegerFeatureValue(feature string) (int64, error) {
 	cfeature := C.CString(feature)
 	cvalue, err := C.arv_device_get_integer_feature_value(d.device, cfeature)
 	C.free(unsafe.Pointer(cfeature))
-	return int(cvalue), err
+	return int64(cvalue), err
 }
