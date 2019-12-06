@@ -204,6 +204,14 @@ func (c *Camera) GetFrameRateBounds() (float64, float64, error) {
 	return float64(min), float64(max), err
 }
 
+func (c *Camera) SetLineRate(lineRate float64) {
+	c.SetFrameRate(lineRate)
+}
+
+func (c *Camera) GetLineRate() (float64, error) {
+	return c.GetFrameRate()
+}
+
 func (c *Camera) SetTrigger(source string) {
 	csource := C.CString(source)
 	C.arv_camera_set_trigger(c.camera, csource)
