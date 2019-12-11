@@ -46,7 +46,7 @@ func (d *Device) SetFloatFeatureValue(feature string, value float64) {
 	C.free(unsafe.Pointer(cfeature))
 }
 
-func (d *Device) GetIntegerFeatureValue(feature string) (float64, error) {
+func (d *Device) GetFloatFeatureValue(feature string) (float64, error) {
 	cfeature := C.CString(feature)
 	cvalue, err := C.arv_device_get_float_feature_value(d.device, cfeature)
 	C.free(unsafe.Pointer(cfeature))
