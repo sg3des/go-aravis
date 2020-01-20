@@ -7,8 +7,7 @@ package aravis
 void arv_set_node_feature_value(ArvDevice *device, char *name, char *value) {
 	ArvGcNode *feature;
 	feature = arv_device_get_feature (device, name);
-	arv_gc_feature_node_set_value_from_string (ARV_GC_FEATURE_NODE (feature),
-												value, NULL);
+	arv_gc_feature_node_set_value_from_string (ARV_GC_FEATURE_NODE (feature), value, NULL);
 }
 */
 import "C"
