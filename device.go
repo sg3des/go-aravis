@@ -3,6 +3,14 @@ package aravis
 // #cgo pkg-config: aravis-0.6
 // #include <arv.h>
 // #include <stdlib.h>
+/*
+void arv_set_node_feature_value(ArvDevice *device, char *name, char *value) {
+	ArvGcNode *feature;
+	feature = arv_device_get_feature (device, name);
+	arv_gc_feature_node_set_value_from_string (ARV_GC_FEATURE_NODE (feature),
+												value, NULL);
+}
+*/
 import "C"
 import "unsafe"
 
@@ -51,4 +59,12 @@ func (d *Device) GetFloatFeatureValue(feature string) (float64, error) {
 	cvalue, err := C.arv_device_get_float_feature_value(d.device, cfeature)
 	C.free(unsafe.Pointer(cfeature))
 	return float64(cvalue), err
+}
+
+func (d *Device) SetNodeFeatureValue(feature, value string) {
+	cfeature := C.CString(feature)
+	cvalue := C.CString(value)
+	C.arv_set_node_feature_value(d.device, cfeature, cvalue)
+	C.free(unsafe.Pointer(cfeature))
+	C.free(unsafe.Pointer(cvalue))
 }
