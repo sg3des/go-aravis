@@ -13,6 +13,15 @@ void arv_set_node_feature_value(ArvDevice *device, char *name, char *value) {
 import "C"
 import "unsafe"
 
+const (
+	DEVICE_STATUS_UNKNOWN        = C.ARV_DEVICE_STATUS_UNKNOWN
+	DEVICE_STATUS_SUCCESS        = C.ARV_DEVICE_STATUS_SUCCESS
+	DEVICE_STATUS_TIMEOUT        = C.ARV_DEVICE_STATUS_TIMEOUT
+	DEVICE_STATUS_WRITE_ERROR    = C.ARV_DEVICE_STATUS_WRITE_ERROR
+	DEVICE_STATUS_TRANSFER_ERROR = C.ARV_DEVICE_STATUS_TRANSFER_ERROR
+	DEVICE_STATUS_NOT_CONNECTED  = C.ARV_DEVICE_STATUS_NOT_CONNECTED
+)
+
 type Device struct {
 	device *C.struct__ArvDevice
 }
@@ -66,4 +75,9 @@ func (d *Device) SetNodeFeatureValue(feature, value string) {
 	C.arv_set_node_feature_value(d.device, cfeature, cvalue)
 	C.free(unsafe.Pointer(cfeature))
 	C.free(unsafe.Pointer(cvalue))
+}
+
+func (d *Device) GetStatus() (int, error) {
+	cvalue, err := C.arv_device_get_status(d.device)
+	return int(cvalue), err
 }
