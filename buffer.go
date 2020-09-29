@@ -47,3 +47,7 @@ func (b *Buffer) GetStatus() (int, error) {
 	status, err := C.arv_buffer_get_status(b.buffer)
 	return int(status), err
 }
+
+func (b *Buffer) IsNil() bool {
+	return buffer == nil
+}
