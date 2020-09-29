@@ -49,5 +49,5 @@ func (b *Buffer) GetStatus() (int, error) {
 }
 
 func (b *Buffer) IsNil() bool {
-	return buffer == nil
+	return b.buffer == nil
 }
