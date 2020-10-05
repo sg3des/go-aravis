@@ -3,10 +3,20 @@ package aravis
 // #cgo pkg-config: aravis-0.6
 // #include <arv.h>
 // #include <stdlib.h>
+/*
+void arv_set_stream_property_long(ArvStream *stream, char *property, long value) {
+	g_object_set (stream, property, value, NULL);
+}
+
+void arv_set_stream_property_double(ArvStream *stream, char *property, double value) {
+	g_object_set (stream, property, value, NULL);
+}
+*/
 import "C"
 import (
 	"errors"
 	"time"
+	"unsafe"
 )
 
 type Stream struct {
@@ -50,4 +60,18 @@ func (s *Stream) TimeoutPopBuffer(t time.Duration) (Buffer, error) {
 
 func (s *Stream) Close() {
 	C.g_object_unref(C.gpointer(s.stream))
+}
+
+func (s *Stream) SetPropertyLong(property string, value int64) {
+	cprop := C.CString(property)
+	cvalue := C.long(value)
+	C.arv_set_stream_property_long(s.stream, cprop, cvalue)
+	C.free(unsafe.Pointer(cprop))
+}
+
+func (s *Stream) SetPropertyDouble(property string, value float32) {
+	cprop := C.CString(property)
+	cvalue := C.double(value)
+	C.arv_set_stream_property_double(s.stream, cprop, cvalue)
+	C.free(unsafe.Pointer(cprop))
 }
