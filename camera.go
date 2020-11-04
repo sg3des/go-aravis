@@ -3,6 +3,20 @@ package aravis
 // #cgo pkg-config: aravis-0.6
 // #include <arv.h>
 // #include <stdlib.h>
+/*
+extern void go_control_lost_handler();
+
+static void control_lost_cb (ArvGvDevice *gv_device)
+{
+	go_control_lost_handler();
+}
+
+static void init_control_lost_cb(ArvCamera *camera)
+{
+	g_signal_connect(arv_camera_get_device(camera), "control-lost",
+		G_CALLBACK (control_lost_cb), NULL);
+}
+*/
 import "C"
 import (
 	"errors"
@@ -48,6 +62,8 @@ func (c *Camera) CreateStream() (Stream, error) {
 	if s.stream == nil {
 		return Stream{}, errors.New("Failed to create stream")
 	}
+
+	C.init_control_lost_cb(c.camera)
 
 	return s, err
 }
@@ -340,4 +356,18 @@ func (c *Camera) GetChunkMode() (bool, error) {
 
 func (c *Camera) Close() {
 	C.g_object_unref(C.gpointer(c.camera))
+}
+
+var controlLostHandler func()
+
+func (c *Camera) SetControlLostHandler(hdl func()) error {
+	controlLostHandler = hdl
+	return nil
+}
+
+//export go_control_lost_handler
+func go_control_lost_handler() {
+	if controlLostHandler != nil {
+		controlLostHandler()
+	}
 }
