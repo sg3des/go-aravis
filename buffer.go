@@ -1,6 +1,6 @@
 package aravis
 
-// #cgo pkg-config: aravis-0.6
+// #cgo pkg-config: aravis-0.8
 // #include <arv.h>
 import "C"
 import "unsafe"
