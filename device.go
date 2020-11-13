@@ -14,12 +14,6 @@ import "C"
 import "unsafe"
 
 const (
-	// DEVICE_STATUS_UNKNOWN        = C.ARV_DEVICE_STATUS_UNKNOWN
-	// DEVICE_STATUS_SUCCESS        = C.ARV_DEVICE_STATUS_SUCCESS
-	// DEVICE_STATUS_TIMEOUT        = C.ARV_DEVICE_STATUS_TIMEOUT
-	// DEVICE_STATUS_WRITE_ERROR    = C.ARV_DEVICE_STATUS_WRITE_ERROR
-	// DEVICE_STATUS_TRANSFER_ERROR = C.ARV_DEVICE_STATUS_TRANSFER_ERROR
-	// DEVICE_STATUS_NOT_CONNECTED  = C.ARV_DEVICE_STATUS_NOT_CONNECTED
 	DEVICE_ERROR_WRONG_FEATURE     = C.ARV_DEVICE_ERROR_WRONG_FEATURE
 	DEVICE_ERROR_FEATURE_NOT_FOUND = C.ARV_DEVICE_ERROR_FEATURE_NOT_FOUND
 	DEVICE_ERROR_NOT_CONNECTED     = C.ARV_DEVICE_ERROR_NOT_CONNECTED
@@ -88,15 +82,3 @@ func (d *Device) SetNodeFeatureValue(feature, value string) {
 	C.free(unsafe.Pointer(cfeature))
 	C.free(unsafe.Pointer(cvalue))
 }
-
-// func (d *Device) GetStatus() (int, error) {
-// 	var gerror *C.GError
-// 	var err error
-// 	var cvalue C.int
-// 	cvalue = C.arv_device_get_status(d.device, &gerror)
-// 	if unsafe.Pointer(gerror) != nil {
-// 		err = errorFromGError(unsafe.Pointer(gerror))
-// 	}
-
-// 	return int(cvalue), err
-// }

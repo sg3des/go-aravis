@@ -180,6 +180,24 @@ func (c *Camera) GetRegion() (int, int, int, int, error) {
 	return int(x), int(y), int(width), int(height), err
 }
 
+func (c *Camera) GetHeight() (int, error) {
+	var gerror *C.GError
+	var err error
+	cs := C.CString("Height")
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_integer(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		err = errorFromGError(gerror)
+	}
+
+	return int(val), err
+}
+
 func (c *Camera) GetHeightBounds() (int, int, error) {
 	var gerror *C.GError
 	var err error
@@ -196,6 +214,24 @@ func (c *Camera) GetHeightBounds() (int, int, error) {
 	}
 
 	return int(min), int(max), err
+}
+
+func (c *Camera) GetWidth() (int, error) {
+	var gerror *C.GError
+	var err error
+	cs := C.CString("Width")
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_integer(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		err = errorFromGError(gerror)
+	}
+
+	return int(val), err
 }
 
 func (c *Camera) GetWidthBounds() (int, int, error) {
