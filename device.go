@@ -117,3 +117,17 @@ func (d *Device) SetNodeFeatureValue(feature, value string) {
 	C.free(unsafe.Pointer(cfeature))
 	C.free(unsafe.Pointer(cvalue))
 }
+
+func (d *Device) ExecuteCommand(feature string) error {
+	var gerror *C.GError
+	var err error
+	cfeature := C.CString(feature)
+
+	C.arv_device_execute_command(d.device, cfeature, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		err = errorFromGError(gerror)
+	}
+
+	C.free(unsafe.Pointer(cfeature))
+	return err
+}
