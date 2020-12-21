@@ -703,6 +703,10 @@ func (c *Camera) SetControlLostHandler(hdl func()) error {
 	return nil
 }
 
+func (c *Camera) IsNil() bool {
+	return c.camera == nil
+}
+
 //export go_control_lost_handler
 func go_control_lost_handler() {
 	if controlLostHandler != nil {

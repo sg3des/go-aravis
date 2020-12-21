@@ -131,3 +131,7 @@ func (d *Device) ExecuteCommand(feature string) error {
 	C.free(unsafe.Pointer(cfeature))
 	return err
 }
+
+func (d *Device) IsNil() bool {
+	return d.device == nil
+}
