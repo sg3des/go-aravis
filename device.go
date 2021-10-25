@@ -84,7 +84,7 @@ func (d *Device) GetStringFeatureValue(feature string) (string, error) {
 
 func (d *Device) SetIntegerFeatureValue(feature string, value int64) {
 	cfeature := C.CString(feature)
-	cvalue := C.longlong(value)
+	cvalue := C.long(value)
 	C.arv_device_set_integer_feature_value(d.device, cfeature, cvalue, nil)
 	C.free(unsafe.Pointer(cfeature))
 }
