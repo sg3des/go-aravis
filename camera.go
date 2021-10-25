@@ -3,6 +3,7 @@ package aravis
 // #cgo pkg-config: aravis-0.8
 // #include <arv.h>
 // #include <stdlib.h>
+// #include <stdio.h>
 /*
 extern void go_control_lost_handler();
 
@@ -16,6 +17,30 @@ static void init_control_lost_cb(ArvCamera *camera)
 	g_signal_connect(arv_camera_get_device(camera), "control-lost",
 		G_CALLBACK (control_lost_cb), NULL);
 }
+
+static void stream_cb_rt(void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer)
+{
+	if (type == ARV_STREAM_CALLBACK_TYPE_INIT) {
+		if (!arv_make_thread_realtime (10))
+			printf ("Failed to make stream thread realtime\n");
+	}
+}
+
+static ArvStream* arv_camera_create_rt_stream(ArvCamera *camera, void *user_data, GError **error) {
+	return arv_camera_create_stream(camera, stream_cb_rt, user_data, error);
+}
+
+static void stream_cb_hp(void *user_data, ArvStreamCallbackType type, ArvBuffer *buffer)
+{
+	if (type == ARV_STREAM_CALLBACK_TYPE_INIT) {
+		if (!arv_make_thread_high_priority (-10))
+			printf ("Failed to make stream thread high priority\n");
+	}
+}
+
+static ArvStream* arv_camera_create_hp_stream(ArvCamera *camera, void *user_data, GError **error) {
+	return arv_camera_create_stream(camera, stream_cb_hp, user_data, error);
+}
 */
 import "C"
 import (
@@ -23,7 +48,9 @@ import (
 )
 
 type Camera struct {
-	camera *C.struct__ArvCamera
+	camera                *C.struct__ArvCamera
+	UseRealtimeThread     bool
+	UseHighPriorityThread bool
 }
 
 const (
@@ -58,12 +85,29 @@ func (c *Camera) CreateStream() (Stream, error) {
 	var gerror *C.GError
 	var err error
 
-	s.stream = C.arv_camera_create_stream(
-		c.camera,
-		nil,
-		nil,
-		&gerror,
-	)
+	switch {
+	case c.UseRealtimeThread:
+		s.stream = C.arv_camera_create_rt_stream(
+			c.camera,
+			nil,
+			&gerror,
+		)
+
+	case c.UseHighPriorityThread:
+		s.stream = C.arv_camera_create_hp_stream(
+			c.camera,
+			nil,
+			&gerror,
+		)
+
+	default:
+		s.stream = C.arv_camera_create_stream(
+			c.camera,
+			nil,
+			nil,
+			&gerror,
+		)
+	}
 
 	if unsafe.Pointer(gerror) != nil {
 		err = errorFromGError(gerror)
