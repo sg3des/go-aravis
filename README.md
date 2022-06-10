@@ -1,7 +1,8 @@
 # go-aravis
 
-Go wrapper around libaravis
+Go wrapper around libaravis 0.8+
 
+If you need libaravis 0.6 go to the original package at https://github.com/thinkski/go-aravis
 
 ## Quickstart
 
