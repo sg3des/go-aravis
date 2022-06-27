@@ -11,7 +11,7 @@ RUN python3 -m pip install meson
 
 RUN git clone https://github.com/AravisProject/aravis.git /opt/aravis && \
     cd /opt/aravis && \
-    git checkout master && \
+    git checkout main && \
     ls -a && \
     meson -Dviewer=disabled -Dintrospection=disabled -Dgst-plugin=disabled -Ddocumentation=disabled build && \
     cd build && \
