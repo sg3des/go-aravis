@@ -175,33 +175,111 @@ func (c *Camera) GetDeviceId() (string, error) {
 	return C.GoString(id), err
 }
 
-func (c *Camera) GetSensorSize() (int, int, error) {
-	var gerror *C.GError
-	var err error
+//
+// features
+//
 
-	var width, height int
+func (c *Camera) GetStringFeature(name string) (string, error) {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_string(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return "", errorFromGError(gerror)
+	}
+
+	return C.GoString(val), nil
+}
+
+func (c *Camera) GetIntegerFeature(name string) (int, error) {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_integer(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return 0, errorFromGError(gerror)
+	}
+
+	return int(val), nil
+}
+
+func (c *Camera) GetFloatFeature(name string) (float64, error) {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_float(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return 0, errorFromGError(gerror)
+	}
+
+	return float64(val), nil
+}
+
+func (c *Camera) IsFeatureAvailable(name string) (bool, error) {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_is_feature_available(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return false, errorFromGError(gerror)
+	}
+
+	return toBool(val), nil
+}
+
+//
+//
+//
+
+func (c *Camera) GetSensorSize() (w int, h int, err error) {
+	var gerror *C.GError
+
 	C.arv_camera_get_sensor_size(
 		c.camera,
-		(*C.gint)(unsafe.Pointer(&width)),
-		(*C.gint)(unsafe.Pointer(&height)),
+		(*C.gint)(unsafe.Pointer(&w)),
+		(*C.gint)(unsafe.Pointer(&h)),
 		&gerror,
 	)
 	if unsafe.Pointer(gerror) != nil {
 		err = errorFromGError(gerror)
 	}
 
-	return int(width), int(height), err
+	return int(w), int(h), err
 }
 
-func (c *Camera) SetRegion(x, y, width, height int) error {
+func (c *Camera) SetRegion(x, y, w, h int) error {
 	var gerror *C.GError
 	var err error
 
 	C.arv_camera_set_region(c.camera,
 		C.gint(x),
 		C.gint(y),
-		C.gint(width),
-		C.gint(height),
+		C.gint(w),
+		C.gint(h),
 		&gerror,
 	)
 	if unsafe.Pointer(gerror) != nil {
@@ -211,29 +289,27 @@ func (c *Camera) SetRegion(x, y, width, height int) error {
 	return err
 }
 
-func (c *Camera) GetRegion() (int, int, int, int, error) {
+func (c *Camera) GetRegion() (x int, y int, w int, h int, err error) {
 	var gerror *C.GError
-	var err error
 
-	var x, y, width, height int
 	C.arv_camera_get_region(
 		c.camera,
 		(*C.gint)(unsafe.Pointer(&x)),
 		(*C.gint)(unsafe.Pointer(&y)),
-		(*C.gint)(unsafe.Pointer(&width)),
-		(*C.gint)(unsafe.Pointer(&height)),
+		(*C.gint)(unsafe.Pointer(&w)),
+		(*C.gint)(unsafe.Pointer(&h)),
 		&gerror,
 	)
 	if unsafe.Pointer(gerror) != nil {
 		err = errorFromGError(gerror)
 	}
 
-	return int(x), int(y), int(width), int(height), err
+	return int(x), int(y), int(w), int(h), err
 }
 
-func (c *Camera) GetHeight() (int, error) {
+func (c *Camera) GetHeight() (height int, err error) {
 	var gerror *C.GError
-	var err error
+
 	cs := C.CString("Height")
 	defer C.free(unsafe.Pointer(cs))
 
@@ -249,11 +325,9 @@ func (c *Camera) GetHeight() (int, error) {
 	return int(val), err
 }
 
-func (c *Camera) GetHeightBounds() (int, int, error) {
+func (c *Camera) GetHeightBounds() (min int, max int, err error) {
 	var gerror *C.GError
-	var err error
 
-	var min, max int
 	C.arv_camera_get_height_bounds(
 		c.camera,
 		(*C.gint)(unsafe.Pointer(&min)),
@@ -267,9 +341,9 @@ func (c *Camera) GetHeightBounds() (int, int, error) {
 	return int(min), int(max), err
 }
 
-func (c *Camera) GetWidth() (int, error) {
+func (c *Camera) GetWidth() (width int, err error) {
 	var gerror *C.GError
-	var err error
+
 	cs := C.CString("Width")
 	defer C.free(unsafe.Pointer(cs))
 
@@ -285,11 +359,9 @@ func (c *Camera) GetWidth() (int, error) {
 	return int(val), err
 }
 
-func (c *Camera) GetWidthBounds() (int, int, error) {
+func (c *Camera) GetWidthBounds() (min int, max int, err error) {
 	var gerror *C.GError
-	var err error
 
-	var min, max int
 	C.arv_camera_get_width_bounds(
 		c.camera,
 		(*C.gint)(unsafe.Pointer(&min)),
@@ -307,11 +379,9 @@ func (c *Camera) SetBinning() {
 	// TODO
 }
 
-func (c *Camera) GetBinning() (int, int, error) {
+func (c *Camera) GetBinning() (min int, max int, err error) {
 	var gerror *C.GError
-	var err error
 
-	var min, max int
 	C.arv_camera_get_binning(
 		c.camera,
 		(*C.gint)(unsafe.Pointer(&min)),
@@ -325,29 +395,25 @@ func (c *Camera) GetBinning() (int, int, error) {
 	return int(min), int(max), err
 }
 
-func (c *Camera) SetPixelFormat() {
-	// TODO
-}
-
-func (c *Camera) GetPixelFormat() (int, error) {
+func (c *Camera) SetPixelFormat(pixfmt string) error {
 	var gerror *C.GError
-	var err error
-	cs := C.CString("PixelFormat")
+
+	cs := C.CString(pixfmt)
 	defer C.free(unsafe.Pointer(cs))
 
-	val := C.arv_camera_get_integer(
+	C.arv_camera_set_pixel_format_from_string(
 		c.camera,
 		cs,
 		&gerror,
 	)
 	if unsafe.Pointer(gerror) != nil {
-		err = errorFromGError(gerror)
+		return errorFromGError(gerror)
 	}
 
-	return int(val), err
+	return nil
 }
 
-func (c *Camera) GetPixelFormatAsString() (string, error) {
+func (c *Camera) GetPixelFormat() (string, error) {
 	var gerror *C.GError
 
 	val := C.arv_camera_get_pixel_format_as_string(c.camera, &gerror)
@@ -358,20 +424,24 @@ func (c *Camera) GetPixelFormatAsString() (string, error) {
 	return C.GoString(val), nil
 }
 
-func (c *Camera) SetPixelFormatFromString() {
-	// TODO
-}
+func (c *Camera) GetAvailablePixelFormats() (list []string, err error) {
+	var gerror *C.GError
+	var num int
 
-func (c *Camera) GetAvailablePixelFormats() {
-	// TODO
-}
+	val := C.arv_camera_dup_available_pixel_formats_as_strings(
+		c.camera,
+		(*C.guint)(unsafe.Pointer(&num)),
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return nil, errorFromGError(gerror)
+	}
 
-func (c *Camera) GetAvailablePixelFormatsAsDisplayNames() {
-	// TODO
-}
+	for _, v := range unsafe.Slice(val, num) {
+		list = append(list, C.GoString(v))
+	}
 
-func (c *Camera) GetAvailablePixelFormatsAsStrings() {
-	// TODO
+	return
 }
 
 func (c *Camera) StartAcquisition() error {

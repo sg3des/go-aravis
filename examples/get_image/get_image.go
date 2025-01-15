@@ -51,7 +51,13 @@ func main() {
 			continue
 		}
 
-		pixfmt, err := camera.GetPixelFormatAsString()
+		// list, err := camera.GetAvailablePixelFormats()
+		// if err != nil {
+		// 	log.Println(i, err)
+		// 	continue
+		// }
+
+		pixfmt, err := camera.GetPixelFormat()
 		if err != nil {
 			log.Println(i, err)
 			continue
