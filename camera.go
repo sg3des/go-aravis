@@ -179,6 +179,28 @@ func (c *Camera) GetDeviceId() (string, error) {
 // features
 //
 
+func (c *Camera) SetStringFeature(name, value string) error {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	csval := C.CString(value)
+	defer C.free(unsafe.Pointer(cs))
+
+	C.arv_camera_set_string(
+		c.camera,
+		cs,
+		csval,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return errorFromGError(gerror)
+	}
+
+	return nil
+}
+
 func (c *Camera) GetStringFeature(name string) (string, error) {
 	var gerror *C.GError
 
