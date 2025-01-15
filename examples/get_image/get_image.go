@@ -51,11 +51,14 @@ func main() {
 			continue
 		}
 
-		// list, err := camera.GetAvailablePixelFormats()
-		// if err != nil {
-		// 	log.Println(i, err)
-		// 	continue
-		// }
+		list, err := camera.GetAvailablePixelFormats()
+		if err != nil {
+			log.Println(i, err)
+			continue
+		}
+		log.Println(list)
+
+		log.Println(camera.SetPixelFormat("BayerRG8"))
 
 		pixfmt, err := camera.GetPixelFormat()
 		if err != nil {
@@ -138,7 +141,9 @@ func serveJPEG(camera aravis.Camera) http.Handler {
 			return
 		}
 
-		log.Println("Received frame size:", len(data))
+		pixfmt, _ := camera.GetPixelFormat()
+
+		log.Println("Received frame size:", len(data), pixfmt)
 
 		// Image is in red-green bayer format
 		img := aravis.NewBayerRG(image.Rect(x, y, width, height))
