@@ -1,6 +1,6 @@
 package aravis
 
-// #cgo pkg-config: aravis-0.8
+// #cgo pkg-config: aravis-0.10
 // #include <arv.h>
 // #include <stdlib.h>
 // #include <stdio.h>
@@ -329,12 +329,33 @@ func (c *Camera) SetPixelFormat() {
 	// TODO
 }
 
-func (c *Camera) GetPixelFormat() {
-	// TODO
+func (c *Camera) GetPixelFormat() (int, error) {
+	var gerror *C.GError
+	var err error
+	cs := C.CString("PixelFormat")
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_camera_get_integer(
+		c.camera,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		err = errorFromGError(gerror)
+	}
+
+	return int(val), err
 }
 
-func (c *Camera) GetPixelFormatAsString() {
-	// TODO
+func (c *Camera) GetPixelFormatAsString() (string, error) {
+	var gerror *C.GError
+
+	val := C.arv_camera_get_pixel_format_as_string(c.camera, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return "", errorFromGError(gerror)
+	}
+
+	return C.GoString(val), nil
 }
 
 func (c *Camera) SetPixelFormatFromString() {

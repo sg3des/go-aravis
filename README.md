@@ -1,26 +1,30 @@
 # go-aravis
 
-Go wrapper around libaravis 0.8+
+Go wrapper around libaravis 0.10
 
-If you need libaravis 0.6 go to the original package at https://github.com/thinkski/go-aravis
+go bindings to libaravis 0.8 - https://github.com/hybridgroup/go-aravis
+
+go bindings to libaravis 0.6 - https://github.com/thinkski/go-aravis
 
 ## Quickstart
 
 How to get the number of connected devices:
 
-    import aravis
-    import log
+```go
+import aravis
+import log
 
-    func main() {
-        aravis.UpdateDeviceList()
+func main() {
+    aravis.UpdateDeviceList()
 
-        n, err := aravis.GetNumDevices()
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        log.Println("Devices:", n)
+    n, err := aravis.GetNumDevices()
+    if err != nil {
+        log.Fatal(err)
     }
+
+    log.Println("Devices:", n)
+}
+```
 
 ## Troubleshooting
 
