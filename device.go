@@ -67,12 +67,35 @@ func (d *Device) LeaveControl() (bool, error) {
 	return toBool(cbool), err
 }
 
-func (d *Device) SetStringFeatureValue(feature, value string) {
+func (d *Device) SetFeatures(value string) error {
+	var gerror *C.GError
+
+	cvalue := C.CString(value)
+
+	C.arv_device_set_features_from_string(d.device, cvalue, &gerror)
+	C.free(unsafe.Pointer(cvalue))
+
+	if unsafe.Pointer(gerror) != nil {
+		return errorFromGError(gerror)
+	}
+
+	return nil
+}
+
+func (d *Device) SetStringFeatureValue(feature, value string) error {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
 	cvalue := C.CString(value)
-	C.arv_device_set_string_feature_value(d.device, cfeature, cvalue, nil)
+	C.arv_device_set_string_feature_value(d.device, cfeature, cvalue, &gerror)
 	C.free(unsafe.Pointer(cfeature))
 	C.free(unsafe.Pointer(cvalue))
+
+	if unsafe.Pointer(gerror) != nil {
+		return errorFromGError(gerror)
+	}
+
+	return nil
 }
 
 func (d *Device) GetStringFeatureValue(feature string) (string, error) {
@@ -130,6 +153,17 @@ func (d *Device) ExecuteCommand(feature string) error {
 
 	C.free(unsafe.Pointer(cfeature))
 	return err
+}
+
+func (d *Device) GetGenicamXML() string {
+	var size int
+
+	cvalue := C.arv_device_get_genicam_xml(
+		d.device,
+		(*C.size_t)(unsafe.Pointer(&size)),
+	)
+
+	return C.GoString(cvalue)
 }
 
 func (d *Device) IsNil() bool {
