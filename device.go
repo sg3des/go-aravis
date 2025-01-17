@@ -20,7 +20,9 @@ gboolean arv_device_leave_control(ArvDevice *device, GError **error) {
 
 */
 import "C"
-import "unsafe"
+import (
+	"unsafe"
+)
 
 const (
 	DEVICE_ERROR_WRONG_FEATURE     = C.ARV_DEVICE_ERROR_WRONG_FEATURE
@@ -43,38 +45,33 @@ type Device struct {
 
 func (d *Device) TakeControl() (bool, error) {
 	var gerror *C.GError
-	var err error
 
 	cbool := C.arv_device_take_control(d.device, &gerror)
-
 	if unsafe.Pointer(gerror) != nil {
-		err = errorFromGError(gerror)
+		return false, errorFromGError(gerror)
 	}
 
-	return toBool(cbool), err
+	return toBool(cbool), nil
 }
 
 func (d *Device) LeaveControl() (bool, error) {
 	var gerror *C.GError
-	var err error
 
 	cbool := C.arv_device_leave_control(d.device, &gerror)
-
 	if unsafe.Pointer(gerror) != nil {
-		err = errorFromGError(gerror)
+		return false, errorFromGError(gerror)
 	}
 
-	return toBool(cbool), err
+	return toBool(cbool), nil
 }
 
 func (d *Device) SetFeatures(value string) error {
 	var gerror *C.GError
 
 	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cvalue))
 
 	C.arv_device_set_features_from_string(d.device, cvalue, &gerror)
-	C.free(unsafe.Pointer(cvalue))
-
 	if unsafe.Pointer(gerror) != nil {
 		return errorFromGError(gerror)
 	}
@@ -82,15 +79,33 @@ func (d *Device) SetFeatures(value string) error {
 	return nil
 }
 
+func (d *Device) IsFeatureAvailable(name string) (bool, error) {
+	var gerror *C.GError
+
+	cs := C.CString(name)
+	defer C.free(unsafe.Pointer(cs))
+
+	val := C.arv_device_is_feature_available(
+		d.device,
+		cs,
+		&gerror,
+	)
+	if unsafe.Pointer(gerror) != nil {
+		return false, errorFromGError(gerror)
+	}
+
+	return toBool(val), nil
+}
+
 func (d *Device) SetStringFeatureValue(feature, value string) error {
 	var gerror *C.GError
 
 	cfeature := C.CString(feature)
+	defer C.free(unsafe.Pointer(cfeature))
 	cvalue := C.CString(value)
-	C.arv_device_set_string_feature_value(d.device, cfeature, cvalue, &gerror)
-	C.free(unsafe.Pointer(cfeature))
-	C.free(unsafe.Pointer(cvalue))
+	defer C.free(unsafe.Pointer(cvalue))
 
+	C.arv_device_set_string_feature_value(d.device, cfeature, cvalue, &gerror)
 	if unsafe.Pointer(gerror) != nil {
 		return errorFromGError(gerror)
 	}
@@ -99,60 +114,100 @@ func (d *Device) SetStringFeatureValue(feature, value string) error {
 }
 
 func (d *Device) GetStringFeatureValue(feature string) (string, error) {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
-	cvalue, err := C.arv_device_get_string_feature_value(d.device, cfeature, nil)
-	C.free(unsafe.Pointer(cfeature))
-	return C.GoString(cvalue), err
+	defer C.free(unsafe.Pointer(cfeature))
+
+	cvalue := C.arv_device_get_string_feature_value(d.device, cfeature, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return "", errorFromGError(gerror)
+	}
+
+	return C.GoString(cvalue), nil
 }
 
-func (d *Device) SetIntegerFeatureValue(feature string, value int64) {
+func (d *Device) SetIntegerFeatureValue(feature string, value int64) error {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
+	defer C.free(unsafe.Pointer(cfeature))
 	cvalue := C.long(value)
-	C.arv_device_set_integer_feature_value(d.device, cfeature, cvalue, nil)
-	C.free(unsafe.Pointer(cfeature))
+
+	C.arv_device_set_integer_feature_value(d.device, cfeature, cvalue, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return errorFromGError(gerror)
+	}
+
+	return nil
 }
 
 func (d *Device) GetIntegerFeatureValue(feature string) (int64, error) {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
-	cvalue, err := C.arv_device_get_integer_feature_value(d.device, cfeature, nil)
-	C.free(unsafe.Pointer(cfeature))
-	return int64(cvalue), err
+	defer C.free(unsafe.Pointer(cfeature))
+
+	cvalue := C.arv_device_get_integer_feature_value(d.device, cfeature, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return 0, errorFromGError(gerror)
+	}
+
+	return int64(cvalue), nil
 }
 
-func (d *Device) SetFloatFeatureValue(feature string, value float64) {
+func (d *Device) SetFloatFeatureValue(feature string, value float64) error {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
+	defer C.free(unsafe.Pointer(cfeature))
 	cvalue := C.double(value)
-	C.arv_device_set_float_feature_value(d.device, cfeature, cvalue, nil)
-	C.free(unsafe.Pointer(cfeature))
+
+	C.arv_device_set_float_feature_value(d.device, cfeature, cvalue, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return errorFromGError(gerror)
+	}
+
+	return nil
 }
 
 func (d *Device) GetFloatFeatureValue(feature string) (float64, error) {
+	var gerror *C.GError
+
 	cfeature := C.CString(feature)
-	cvalue, err := C.arv_device_get_float_feature_value(d.device, cfeature, nil)
-	C.free(unsafe.Pointer(cfeature))
-	return float64(cvalue), err
+	defer C.free(unsafe.Pointer(cfeature))
+
+	cvalue := C.arv_device_get_float_feature_value(d.device, cfeature, &gerror)
+	if unsafe.Pointer(gerror) != nil {
+		return 0, errorFromGError(gerror)
+	}
+
+	return float64(cvalue), nil
 }
 
-func (d *Device) SetNodeFeatureValue(feature, value string) {
+func (d *Device) SetNodeFeatureValue(feature, value string) error {
 	cfeature := C.CString(feature)
 	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cfeature))
+	defer C.free(unsafe.Pointer(cvalue))
+
 	C.arv_set_node_feature_value(d.device, cfeature, cvalue)
-	C.free(unsafe.Pointer(cfeature))
-	C.free(unsafe.Pointer(cvalue))
+
+	return nil
 }
 
 func (d *Device) ExecuteCommand(feature string) error {
 	var gerror *C.GError
-	var err error
+
 	cfeature := C.CString(feature)
+	defer C.free(unsafe.Pointer(cfeature))
 
 	C.arv_device_execute_command(d.device, cfeature, &gerror)
 	if unsafe.Pointer(gerror) != nil {
-		err = errorFromGError(gerror)
+		return errorFromGError(gerror)
 	}
 
-	C.free(unsafe.Pointer(cfeature))
-	return err
+	return nil
 }
 
 func (d *Device) GetGenicamXML() string {
